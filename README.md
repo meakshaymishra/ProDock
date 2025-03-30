@@ -1,6 +1,6 @@
 # ProDock - macOS Dock Preset Manager
 
-[![macOS](https://img.shields.io/badge/macOS-14.0%2B-blue)](https://www.apple.com/macos/sonoma/)
+[![macOS](https://img.shields.io/badge/macOS-15.0%2B-blue)](https://www.apple.com/macos/sonoma/)
 [![Swift](https://img.shields.io/badge/Swift-5.9%2B-orange.svg)](https://swift.org)
 [![SwiftUI](https://img.shields.io/badge/SwiftUI-native-purple.svg)](https://developer.apple.com/xcode/swiftui/)
 <!-- Optional: Add a license badge if you choose one -->
@@ -25,8 +25,8 @@ ProDock acts as a user-friendly graphical interface (GUI) for the powerful `dock
 **All Dock manipulations** (reading the current state, removing all items, adding specific apps/folders/stacks) are performed by ProDock executing `dockutil` commands in the background via `/bin/sh -c`.
 
 A compatible version of the `dockutil` executable is **bundled directly within the ProDock application**. This means:
-✅ No separate installation of `dockutil` or Homebrew is required.
-✅ ProDock uses a specific, tested version of the tool.
+* ✅ No separate installation of `dockutil` or Homebrew is required.
+* ✅ ProDock uses a specific, tested version of the tool.
 
 ## Installation
 
@@ -66,4 +66,4 @@ Contributions, issues, and feature requests are welcome! Please feel free to ope
 
 ## License
 
-Distributed under the [**MIT License**](LICENSE.txt). *(<- Choose a license, create a LICENSE.txt file, and update this link! If no license, remove this section or state "All rights reserved.")*
+Distributed under the [**MIT License**](LICENSE.txt).
