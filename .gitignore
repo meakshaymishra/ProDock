@@ -1,0 +1,72 @@
+# --- macOS/Swift Xcode ---
+
+## Build generated
+build/
+Build/
+DerivedData/
+*.app
+*.ipa
+*.dSYM/
+*.xcscheme
+*.xctest/
+
+## Various settings
+*.xcsettings
+
+## User settings
+xcuserdata/
+*.xcuserstate
+
+# Swift Package Manager
+# Package.resolved often IS committed to lock dependencies, but .build/ etc. are ignored
+.build/
+.swiftpm/
+
+# Cocoapods (If you ever add them)
+# Pods/
+# Podfile.lock
+
+# Carthage (If you ever add them)
+# Carthage/
+
+## Implicitly ignored by Xcode
+*.hmap
+*.ipa
+*.ipa.dSYM
+*.zip
+
+# Temporary / Backup Files
+*~
+*.swp
+*.bak
+*.tmp
+
+# macOS specific
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Cache files
+*.pyc
+*.pyo
+
+# Logs
+*.log
+Logs/
+
+# Bundle Resource Check (You WANT to commit your bundled dockutil, so DON'T ignore it here)
+# Generally, ignore specific resource files ONLY if they are sensitive or huge temp data
+# Example: MyBigDataFile.dat
+
+# Secrets / Environment Variables (Create a separate file for secrets!)
+# If you add a file like secrets.plist or .env, add it here:
+# secrets.plist
+# .env
+
+# Debug/Generated Entitlements?
+# Sometimes intermediate entitlements are generated. Usually the source .entitlements is committed.
+# Check build output if necessary.
+
+# Large assets not meant for Git (use Git LFS if needed)
+# *.psd
+# *.aep

@@ -1,0 +1,574 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		4F0872362D994D520006C3C7 /* dockutil in Resources */ = {isa = PBXBuildFile; fileRef = 4F0872352D994D520006C3C7 /* dockutil */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		4F6F47632D99423F0035612A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4F6F47492D99423D0035612A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4F6F47502D99423D0035612A;
+			remoteInfo = ProDock;
+		};
+		4F6F476D2D99423F0035612A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4F6F47492D99423D0035612A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4F6F47502D99423D0035612A;
+			remoteInfo = ProDock;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		4F0872352D994D520006C3C7 /* dockutil */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = dockutil; path = ../../../../../../usr/local/bin/dockutil; sourceTree = "<group>"; };
+		4F6F47512D99423D0035612A /* ProDock.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ProDock.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4F6F47622D99423F0035612A /* ProDockTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ProDockTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4F6F476C2D99423F0035612A /* ProDockUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ProDockUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		4F6F47532D99423D0035612A /* ProDock */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ProDock;
+			sourceTree = "<group>";
+		};
+		4F6F47652D99423F0035612A /* ProDockTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ProDockTests;
+			sourceTree = "<group>";
+		};
+		4F6F476F2D99423F0035612A /* ProDockUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ProDockUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		4F6F474E2D99423D0035612A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4F6F475F2D99423F0035612A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4F6F47692D99423F0035612A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		4F6F47482D99423D0035612A = {
+			isa = PBXGroup;
+			children = (
+				4F0872352D994D520006C3C7 /* dockutil */,
+				4F6F47532D99423D0035612A /* ProDock */,
+				4F6F47652D99423F0035612A /* ProDockTests */,
+				4F6F476F2D99423F0035612A /* ProDockUITests */,
+				4F6F47522D99423D0035612A /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		4F6F47522D99423D0035612A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				4F6F47512D99423D0035612A /* ProDock.app */,
+				4F6F47622D99423F0035612A /* ProDockTests.xctest */,
+				4F6F476C2D99423F0035612A /* ProDockUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		4F6F47502D99423D0035612A /* ProDock */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4F6F47762D99423F0035612A /* Build configuration list for PBXNativeTarget "ProDock" */;
+			buildPhases = (
+				4F6F474D2D99423D0035612A /* Sources */,
+				4F6F474E2D99423D0035612A /* Frameworks */,
+				4F6F474F2D99423D0035612A /* Resources */,
+				4F6F47812D99437D0035612A /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				4F6F47532D99423D0035612A /* ProDock */,
+			);
+			name = ProDock;
+			packageProductDependencies = (
+			);
+			productName = ProDock;
+			productReference = 4F6F47512D99423D0035612A /* ProDock.app */;
+			productType = "com.apple.product-type.application";
+		};
+		4F6F47612D99423F0035612A /* ProDockTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4F6F47792D99423F0035612A /* Build configuration list for PBXNativeTarget "ProDockTests" */;
+			buildPhases = (
+				4F6F475E2D99423F0035612A /* Sources */,
+				4F6F475F2D99423F0035612A /* Frameworks */,
+				4F6F47602D99423F0035612A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4F6F47642D99423F0035612A /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				4F6F47652D99423F0035612A /* ProDockTests */,
+			);
+			name = ProDockTests;
+			packageProductDependencies = (
+			);
+			productName = ProDockTests;
+			productReference = 4F6F47622D99423F0035612A /* ProDockTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		4F6F476B2D99423F0035612A /* ProDockUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4F6F477C2D99423F0035612A /* Build configuration list for PBXNativeTarget "ProDockUITests" */;
+			buildPhases = (
+				4F6F47682D99423F0035612A /* Sources */,
+				4F6F47692D99423F0035612A /* Frameworks */,
+				4F6F476A2D99423F0035612A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4F6F476E2D99423F0035612A /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				4F6F476F2D99423F0035612A /* ProDockUITests */,
+			);
+			name = ProDockUITests;
+			packageProductDependencies = (
+			);
+			productName = ProDockUITests;
+			productReference = 4F6F476C2D99423F0035612A /* ProDockUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		4F6F47492D99423D0035612A /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1620;
+				LastUpgradeCheck = 1620;
+				TargetAttributes = {
+					4F6F47502D99423D0035612A = {
+						CreatedOnToolsVersion = 16.2;
+					};
+					4F6F47612D99423F0035612A = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = 4F6F47502D99423D0035612A;
+					};
+					4F6F476B2D99423F0035612A = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = 4F6F47502D99423D0035612A;
+					};
+				};
+			};
+			buildConfigurationList = 4F6F474C2D99423D0035612A /* Build configuration list for PBXProject "ProDock" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 4F6F47482D99423D0035612A;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 4F6F47522D99423D0035612A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				4F6F47502D99423D0035612A /* ProDock */,
+				4F6F47612D99423F0035612A /* ProDockTests */,
+				4F6F476B2D99423F0035612A /* ProDockUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		4F6F474F2D99423D0035612A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4F0872362D994D520006C3C7 /* dockutil in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4F6F47602D99423F0035612A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4F6F476A2D99423F0035612A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		4F6F47812D99437D0035612A /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "chmod +x \"$CODESIGNING_FOLDER_PATH/Contents/Resources/dockutil\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		4F6F474D2D99423D0035612A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4F6F475E2D99423F0035612A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4F6F47682D99423F0035612A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		4F6F47642D99423F0035612A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4F6F47502D99423D0035612A /* ProDock */;
+			targetProxy = 4F6F47632D99423F0035612A /* PBXContainerItemProxy */;
+		};
+		4F6F476E2D99423F0035612A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4F6F47502D99423D0035612A /* ProDock */;
+			targetProxy = 4F6F476D2D99423F0035612A /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		4F6F47742D99423F0035612A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		4F6F47752D99423F0035612A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		4F6F47772D99423F0035612A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = ProDock/ProDockDebug.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"ProDock/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.akmi.ProDock;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		4F6F47782D99423F0035612A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = ProDock/ProDock.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"ProDock/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.akmi.ProDock;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		4F6F477A2D99423F0035612A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.akmi.ProDockTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 6.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ProDock.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ProDock";
+			};
+			name = Debug;
+		};
+		4F6F477B2D99423F0035612A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.akmi.ProDockTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 6.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ProDock.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ProDock";
+			};
+			name = Release;
+		};
+		4F6F477D2D99423F0035612A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.akmi.ProDockUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = ProDock;
+			};
+			name = Debug;
+		};
+		4F6F477E2D99423F0035612A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.akmi.ProDockUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = ProDock;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		4F6F474C2D99423D0035612A /* Build configuration list for PBXProject "ProDock" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4F6F47742D99423F0035612A /* Debug */,
+				4F6F47752D99423F0035612A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4F6F47762D99423F0035612A /* Build configuration list for PBXNativeTarget "ProDock" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4F6F47772D99423F0035612A /* Debug */,
+				4F6F47782D99423F0035612A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4F6F47792D99423F0035612A /* Build configuration list for PBXNativeTarget "ProDockTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4F6F477A2D99423F0035612A /* Debug */,
+				4F6F477B2D99423F0035612A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4F6F477C2D99423F0035612A /* Build configuration list for PBXNativeTarget "ProDockUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4F6F477D2D99423F0035612A /* Debug */,
+				4F6F477E2D99423F0035612A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 4F6F47492D99423D0035612A /* Project object */;
+}
