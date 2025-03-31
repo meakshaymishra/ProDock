@@ -6,10 +6,6 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		4F0872362D994D520006C3C7 /* dockutil in Resources */ = {isa = PBXBuildFile; fileRef = 4F0872352D994D520006C3C7 /* dockutil */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXContainerItemProxy section */
 		4F6F47632D99423F0035612A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -28,7 +24,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		4F0872352D994D520006C3C7 /* dockutil */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = dockutil; path = ../../../../../../usr/local/bin/dockutil; sourceTree = "<group>"; };
 		4F6F47512D99423D0035612A /* ProDock.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ProDock.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4F6F47622D99423F0035612A /* ProDockTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ProDockTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4F6F476C2D99423F0035612A /* ProDockUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ProDockUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -80,7 +75,6 @@
 		4F6F47482D99423D0035612A = {
 			isa = PBXGroup;
 			children = (
-				4F0872352D994D520006C3C7 /* dockutil */,
 				4F6F47532D99423D0035612A /* ProDock */,
 				4F6F47652D99423F0035612A /* ProDockTests */,
 				4F6F476F2D99423F0035612A /* ProDockUITests */,
@@ -219,7 +213,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4F0872362D994D520006C3C7 /* dockutil in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
