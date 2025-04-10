@@ -3,15 +3,13 @@ import AppKit
 import SwiftUI
 
 struct ContentView: View {
-    // ... (EnvironmentObject, body structure remains the same) ...
     @EnvironmentObject private var viewModel: PresetViewModel
 
     var body: some View {
         HStack(spacing: 0) {
-            // --- Left Pane (Unchanged) ---
             VStack(alignment: .leading, spacing: 0) { /*...*/
                 HStack {
-                    Image("AppIcon").resizable().aspectRatio(contentMode: .fit).frame(
+                    Image("ProDockIcon").resizable().aspectRatio(contentMode: .fit).frame(
                         width: 30, height: 30)
                     Text("Pro Dock").font(.title2).fontWeight(.medium)
                     Spacer()
@@ -38,8 +36,6 @@ struct ContentView: View {
             }.frame(maxWidth: 400)
 
             Divider()
-
-            // --- Right Pane (Edit View - Unchanged) ---
             VStack(alignment: .leading) {
                 if let selectedPreset = viewModel.selectedPresetForEditing {
                     Text("Edit Preset: \(selectedPreset.name)")
@@ -54,7 +50,7 @@ struct ContentView: View {
                     } else {
                         List {
                             ForEach(viewModel.editablePresetItems) { item in
-                                PresetItemRow(item: item)  // Row handles its own layout
+                                PresetItemRow(item: item)  // PresetItemRow now includes dragger
                             }
                             .onMove(perform: viewModel.moveItem)
                         }
@@ -83,8 +79,7 @@ struct ContentView: View {
     }
 }
 
-// MARK: - Preset Row View (Left Pane - Unchanged)
-// ... (PresetRow struct remains the same) ...
+// MARK: - Preset Row View (Left Pane)
 struct PresetRow: View {
     let preset: DockPreset
     @EnvironmentObject private var viewModel: PresetViewModel
@@ -92,7 +87,7 @@ struct PresetRow: View {
     private let iconButtonColor = Color.secondary
     var body: some View {
         HStack(spacing: 10) {
-            Image(systemName: "line.3.horizontal").foregroundColor(.secondary)
+//            Image(systemName: "line.3.horizontal").foregroundColor(.secondary)
             VStack(alignment: .leading, spacing: 2) {
                 Text(preset.name).fontWeight(.medium).lineLimit(1)
                 Text(preset.shortcut ?? "No Shortcut").font(.caption).foregroundColor(.secondary)
@@ -117,17 +112,17 @@ struct PresetRow: View {
     }
 }
 
-// MARK: - Preset Item Row View (Right Pane - MODIFIED)
+// MARK: - Preset Item Row View (Right Pane)
 struct PresetItemRow: View {
     let item: PresetItemRepresentation
     @EnvironmentObject private var viewModel: PresetViewModel
 
-    // Custom binding (Unchanged)
+    // Custom binding
     private var bindingIsEnabled: Binding<Bool> {
         Binding(get: { item.isEnabled }, set: { _ in viewModel.toggleItemEnabled(itemID: item.id) })
     }
 
-    // Content fragment (Unchanged)
+    // Content fragment
     private var contentFragment: String {
         item.originalFragment.hasPrefix(disabledPrefix)
             ? String(item.originalFragment.dropFirst(disabledPrefix.count))
@@ -135,18 +130,24 @@ struct PresetItemRow: View {
     }
 
     var body: some View {
-        HStack {
-            // Call icon function
+        HStack(spacing: 8) {  // Adjust spacing as needed
+            // **NEW: Add the drag handle icon**
+            Image(systemName: "line.3.horizontal")
+                .foregroundColor(.secondary)
+                .padding(.trailing, 4)  // Add a little space after the handle
+
+            // Icon for the actual item
             iconForFragment(contentFragment)
-                // Apply FRAME here, outside the function call
                 .frame(width: 20, height: 20)
                 .opacity(item.isEnabled ? 1.0 : 0.5)
 
+            // Display Name
             Text(item.displayName)
                 .opacity(item.isEnabled ? 1.0 : 0.5)
 
-            Spacer()
+            Spacer()  // Push toggle to the right
 
+            // Toggle switch
             Toggle("", isOn: bindingIsEnabled)
                 .toggleStyle(.switch)
                 .labelsHidden()
@@ -154,55 +155,40 @@ struct PresetItemRow: View {
         .padding(.vertical, 4)
     }
 
-    // MARK: - Icon Generation Helper (MODIFIED)
-
-    /// Generates an appropriate SwiftUI Image, already sized, for a command fragment.
-    @ViewBuilder
-    private func iconForFragment(_ contentFragment: String) -> some View {
-        // Apply modifiers INSIDE each branch before returning
+    // MARK: - Icon Generation Helper
+    @ViewBuilder private func iconForFragment(_ contentFragment: String) -> some View { /* ... */
         if let path = extractPathFromFragment(contentFragment) {
             let fullPath = (path as NSString).expandingTildeInPath
             if path.lowercased().hasSuffix(".app")
                 && FileManager.default.fileExists(atPath: fullPath)
             {
                 let nsIcon = NSWorkspace.shared.icon(forFile: fullPath)
-                Image(nsImage: nsIcon)
-                    .resizable()  // Apply here
-                    .aspectRatio(contentMode: .fit)  // Apply here
+                Image(nsImage: nsIcon).resizable().aspectRatio(contentMode: .fit)
             } else {
                 var isDirectory: ObjCBool = false
                 if FileManager.default.fileExists(atPath: fullPath, isDirectory: &isDirectory)
                     && isDirectory.boolValue
                 {
-                    Image(systemName: "folder")
-                        .resizable()  // Apply here
-                        .aspectRatio(contentMode: .fit)  // Apply here
+                    Image(systemName: "folder").resizable().aspectRatio(contentMode: .fit)
                 } else {
                     if FileManager.default.fileExists(atPath: fullPath) {
-                        Image(systemName: "doc")
-                            .resizable()  // Apply here
-                            .aspectRatio(contentMode: .fit)  // Apply here
+                        Image(systemName: "doc").resizable().aspectRatio(contentMode: .fit)
                     } else {
-                        Image(systemName: "questionmark.diamond")  // Path non-existent
-                            .resizable()  // Apply here
-                            .aspectRatio(contentMode: .fit)  // Apply here
+                        Image(systemName: "questionmark.diamond").resizable().aspectRatio(
+                            contentMode: .fit)
                     }
                 }
             }
         } else if contentFragment.contains("--type spacer")
             || contentFragment.contains("--type small-spacer")
         {
-            Image(systemName: "rectangle.dashed")  // Spacer icon
-                .resizable()  // Apply here
-                .aspectRatio(contentMode: .fit)  // Apply here
+            Image(systemName: "rectangle.dashed").resizable().aspectRatio(contentMode: .fit)
         } else {
-            Image(systemName: "questionmark.diamond")  // Default fallback
-                .resizable()  // Apply here
-                .aspectRatio(contentMode: .fit)  // Apply here
+            Image(systemName: "questionmark.diamond").resizable().aspectRatio(contentMode: .fit)
         }
     }
 
-    /// Extracts path from CONTENT fragment (Unchanged)
+    /// Extracts path from CONTENT fragment
     private func extractPathFromFragment(_ contentFragment: String) -> String? { /* ... */
         let trimmed = contentFragment.trimmingCharacters(in: .whitespaces)
         if trimmed.starts(with: "''")
@@ -243,7 +229,7 @@ struct PresetItemRow: View {
     }
 }
 
-// MARK: - Preview (Unchanged)
+// MARK: - Preview
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View { /* ... same preview code ... */
         let pVM = PresetViewModel()

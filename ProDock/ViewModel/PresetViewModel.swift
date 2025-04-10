@@ -59,7 +59,7 @@ class PresetViewModel: ObservableObject {
             in: &cancellables)
     }
 
-    // MARK: - Accessibility & Hotkeys (Unchanged)
+    // MARK: - Accessibility & Hotkeys
     // ... checkAndSetupGlobalKeyListener, setupMonitor, removeGlobalKeyListener ...
     func checkAndSetupGlobalKeyListener() { /*...*/
         guard eventMonitor == nil else {
@@ -95,7 +95,7 @@ class PresetViewModel: ObservableObject {
         }
     }
 
-    // MARK: - Core Actions (Unchanged - Apply already checks prefix)
+    // MARK: - Core Actions
     // ... saveCurrentDock, applyPreset, editPreset, duplicatePreset, deletePreset, deletePresets ...
     func saveCurrentDock() { /*...*/
         let name = newPresetName.trimmingCharacters(in: .whitespacesAndNewlines)
