@@ -2,7 +2,7 @@
 
 import SwiftUI
 import Combine
-import AppKit // For NSEvent (not for Accessibility API directly here)
+import AppKit // Required for NSWorkspace, NSImage, NSEvent
 
 @MainActor
 internal func checkAccessibilityPermission() -> Bool {
@@ -16,6 +16,69 @@ internal func checkAccessibilityPermission() -> Bool {
     print("Accessibility Check Result (Helper): \(isTrusted)")
     
     return isTrusted
+}
+
+// Structure to hold parsed app info for the UI
+struct PresetAppInfo: Identifiable, Hashable {
+    let id = UUID() // For Identifiable conformance in SwiftUI lists
+    let path: String
+    var label: String? // Optional label extracted from command
+    var icon: NSImage? // The application icon
+
+    // Simple parser - assumes path is the first argument (often quoted)
+    static func parse(from fragment: String) -> (path: String, label: String?)? {
+        var extractedPath: String?
+        var extractedLabel: String?
+
+        // Try to find path within single quotes first
+        if let pathRange = fragment.range(of: "'[^']+'", options: .regularExpression) {
+            extractedPath = String(fragment[pathRange]).trimmingCharacters(in: CharacterSet(charactersIn: "'"))
+        } else {
+             // If no quotes, assume the first space-separated token *could* be a path
+             // This is less reliable - dockutil usually quotes paths with spaces
+             if let firstToken = fragment.split(separator: " ", maxSplits: 1).first {
+                 let potentialPath = String(firstToken)
+                 // Basic check if it looks like a path (contains slashes)
+                 if potentialPath.contains("/") {
+                     extractedPath = potentialPath // Could be improved with file existence check
+                 }
+             }
+        }
+
+        guard let path = extractedPath else {
+            print("Warning: Could not reliably find path in fragment: \(fragment)")
+            return nil // Cannot proceed without path
+        }
+
+        // Find label if '--label' exists (handle quoted and unquoted labels)
+        if let labelRange = fragment.range(of: "--label\s+'([^']+)'", options: .regularExpression) {
+            // Extract the captured group within quotes
+             if let match = fragment.range(of: "(?<=--label\s+')[^']+", options: .regularExpression) {
+                 extractedLabel = String(fragment[match])
+             }
+        } else if let labelRange = fragment.range(of: "--label\s+([^\s']+)", options: .regularExpression) {
+             // Handle labels without quotes
+             if let match = fragment.range(of: "(?<=--label\s)[^\s']+", options: .regularExpression) {
+                  extractedLabel = String(fragment[match])
+             }
+        }
+
+        // If no explicit label found, try deriving from path
+        if extractedLabel == nil {
+             if let url = URL(string: "file://\(path.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? "")"),
+                let appName = url.deletingPathExtension().lastPathComponent {
+                  extractedLabel = appName
+             } else {
+                 extractedLabel = path // Fallback to the path itself
+             }
+        }
+        
+        // Basic check: If the path doesn't contain ".app" or isn't an absolute path, it might be something else (spacer, etc.)
+        // We might want to filter these out or handle them differently later.
+        // For now, we'll return what we found.
+
+        return (path: path, label: extractedLabel)
+    }
 }
 
 
@@ -81,7 +144,7 @@ class PresetViewModel: ObservableObject {
         }
         
         // Call the dedicated @MainActor helper function to perform the check
-        let appIsTrusted = checkAccessibilityPermission() // Defined in AccessibilityHelper.swift
+        let appIsTrusted = checkAccessibilityPermission() 
         self.accessibilityGranted = appIsTrusted         // Update published property
 
         if appIsTrusted {
@@ -92,7 +155,7 @@ class PresetViewModel: ObservableObject {
                 // Event handling code remains the same...
                 guard let self = self else { return }
                 let desiredModifiers: NSEvent.ModifierFlags = [.command, .option]
-                let desiredKeyCode: UInt16 = 12 // Q key KeyCode (Find others using tools like Key Codes app)
+                let desiredKeyCode: UInt16 = 12 // Q key KeyCode 
 
                 // Check if the event matches the shortcut
                 if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == desiredModifiers && event.keyCode == desiredKeyCode {
@@ -103,7 +166,6 @@ class PresetViewModel: ObservableObject {
                     // For now, we just apply the first preset as a demo.
                     if let presetToApply = self.presetStore.presets.first {
                         print("Applying preset via shortcut: \(presetToApply.name)")
-                        // `applyPreset` is already MainActor safe
                         self.applyPreset(presetToApply)
                     } else {
                         print("Shortcut triggered, but no presets found to apply.")
@@ -232,6 +294,38 @@ class PresetViewModel: ObservableObject {
         statusMessage = "Deleted preset(s): \(namesToDelete)."
     }
 
+    // MARK: - UI Helper Functions (New)
+
+    /// Parses command fragments and fetches icons for a given preset.
+    func getAppsForPreset(_ preset: DockPreset) -> [PresetAppInfo] {
+        var appInfos: [PresetAppInfo] = []
+        for fragment in preset.addCommandFragments {
+            if let parsed = PresetAppInfo.parse(from: fragment) {
+                // Basic filter: Only include items that look like apps for now
+                // You might want to refine this to handle folders, URLs, etc. later
+                if parsed.path.hasSuffix(".app") || parsed.path.contains(".app/") {
+                    let icon = getIconForApp(path: parsed.path)
+                    appInfos.append(PresetAppInfo(path: parsed.path, label: parsed.label ?? "Unknown App", icon: icon))
+                 } else {
+                     print("Skipping non-app item in UI list: \(parsed.path)")
+                     // Optionally, represent spacers or other items differently in the future
+                     // appInfos.append(PresetAppInfo(path: parsed.path, label: parsed.label ?? "Other Item", icon: NSImage(systemSymbolName: "ellipsis", accessibilityDescription: "Other item")))
+                 }
+            } else {
+                // Handle fragments that couldn't be parsed (e.g., invalid entries?)
+                 print("Could not parse fragment: \(fragment)")
+                 appInfos.append(PresetAppInfo(path: "parse_error", label: "Unknown Item [\(fragment.prefix(20))...]", icon: NSImage(systemSymbolName: "questionmark.diamond", accessibilityDescription: "Unknown item")))
+            }
+        }
+        return appInfos
+    }
+
+    /// Fetches the icon for a given application path.
+    private func getIconForApp(path: String) -> NSImage? {
+        // Use NSWorkspace to get the icon for the file path.
+        // NSWorkspace handles non-existent paths gracefully by returning a generic document icon.
+        return NSWorkspace.shared.icon(forFile: path)
+    }
 
     // MARK: - Private Helpers
     private func presentError(_ message: String) {
@@ -242,3 +336,4 @@ class PresetViewModel: ObservableObject {
     }
 
 } // End of PresetViewModel class
+

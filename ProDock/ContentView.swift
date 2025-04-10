@@ -2,39 +2,78 @@
 import SwiftUI
 
 struct ContentView: View {
-    // Get the ViewModel from the Environment - DO NOT use @StateObject here
     @EnvironmentObject private var viewModel: PresetViewModel
+    // Track which preset detail is expanded (optional, for controlling expansion)
+    @State private var expandedPresetID: UUID? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 15) {
             Text("Pro Dock")
                 .font(.title)
 
-            // List of Saved Presets
+            // List of Saved Presets using DisclosureGroup
             List {
-                // Use the viewModel from the environment
                 ForEach(viewModel.presetStore.presets) { preset in
-                    HStack {
-                        Text(preset.name)
-                            .lineLimit(1)
-                        Spacer()
-                        Button("Apply") {
-                            viewModel.applyPreset(preset)
-                        }
-                        .buttonStyle(.bordered)
-                        .disabled(viewModel.isLoading)
+                    DisclosureGroup(
+                        isExpanded: Binding<Bool>( // Control expansion state
+                            get: { self.expandedPresetID == preset.id },
+                            set: { isExpanding in
+                                self.expandedPresetID = isExpanding ? preset.id : nil
+                            }
+                        ),
+                        content: { // Content shown when expanded
+                            // Fetch and display the app list for the preset
+                            let appInfos = viewModel.getAppsForPreset(preset)
+                            if !appInfos.isEmpty {
+                                PresetDetailView(apps: appInfos)
+                                     // Remove default padding/inset added by DisclosureGroup content
+                                     .listRowInsets(EdgeInsets(top: 0, leading: 10, bottom: 10, trailing: 0))
+                            } else {
+                                Text("No applications found in this preset.")
+                                    .foregroundColor(.secondary)
+                                    .padding(.vertical, 5)
+                                     .listRowInsets(EdgeInsets(top: 0, leading: 10, bottom: 10, trailing: 0))
+                            }
+                        },
+                        label: { // The clickable row for the preset
+                            HStack {
+                                Text(preset.name)
+                                    .font(.headline) // Make preset name slightly more prominent
+                                    .lineLimit(1)
+                                Spacer()
+                                Button("Apply") {
+                                    // Prevent applying if detail is expanded (optional)
+                                    if expandedPresetID != preset.id {
+                                        viewModel.applyPreset(preset)
+                                    }
+                                }
+                                .buttonStyle(.bordered)
+                                .disabled(viewModel.isLoading)
+                                // Prevent disclosure group from expanding when clicking Apply
+                                .onTapGesture { viewModel.applyPreset(preset) }
 
-                        Button {
-                           viewModel.deletePreset(preset)
-                        } label: {
-                           Image(systemName: "trash")
-                                .foregroundColor(.red)
+                                Button {
+                                     // Prevent deleting if detail is expanded (optional)
+                                     if expandedPresetID != preset.id {
+                                         viewModel.deletePreset(preset)
+                                     }
+                                } label: {
+                                   Image(systemName: "trash")
+                                        .foregroundColor(.red)
+                                }
+                                .buttonStyle(.plain)
+                                .disabled(viewModel.isLoading)
+                                // Prevent disclosure group from expanding when clicking Delete
+                                .onTapGesture { viewModel.deletePreset(preset) }
+                            }
+                            .contentShape(Rectangle()) // Makes the whole HStack clickable for disclosure
                         }
-                        .buttonStyle(.plain)
-                        .disabled(viewModel.isLoading)
-                    }
+                    )
+                     // Add padding between disclosure groups
+                     .padding(.vertical, 3)
                 }
-                .onDelete(perform: viewModel.deletePresets)
+                // onDelete still works with DisclosureGroup if needed, but might be complex
+                 // .onDelete(perform: viewModel.deletePresets) // Consider if this interaction is still desired
             }
             .listStyle(.bordered(alternatesRowBackgrounds: true))
             .frame(minHeight: 200)
@@ -46,7 +85,6 @@ struct ContentView: View {
                 Text("Save Current Dock as New Preset:")
                     .font(.headline)
                 HStack {
-                    // Use the viewModel from the environment
                     TextField("Preset Name", text: $viewModel.newPresetName)
                         .textFieldStyle(.roundedBorder)
 
@@ -96,9 +134,7 @@ struct ContentView: View {
              Text(viewModel.errorMessage)
         }
         .onAppear {
-            // Perform the setup when the view appears
             print("ContentView appeared. Setting up key listener...")
-            // Use the viewModel from the environment
             viewModel.checkAndSetupGlobalKeyListener()
         }
     }
@@ -106,8 +142,15 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        // Provide a dummy VM *only* for the preview
-        ContentView()
-            .environmentObject(PresetViewModel())
+        // Create a preview VM and load some dummy data
+        let previewViewModel = PresetViewModel()
+        previewViewModel.presetStore.presets = [
+            DockPreset(name: "Development", addCommandFragments: ["'/Applications/Xcode.app' --label 'Xcode'", "'/Applications/Visual Studio Code.app'", "'~/Downloads/' --view grid --display folder"]),
+            DockPreset(name: "Design", addCommandFragments: ["'/Applications/Sketch.app'", "'/Applications/Figma.app'", "--add 'spacer-tile' --type spacer"])
+        ]
+        
+        return ContentView()
+            .environmentObject(previewViewModel)
     }
 }
+
