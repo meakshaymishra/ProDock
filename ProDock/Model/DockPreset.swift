@@ -14,4 +14,6 @@ struct DockPreset: Identifiable, Codable, Hashable {
     var name: String
     // Store the list of 'dockutil --add' command fragments needed to recreate the preset
     var addCommandFragments: [String]
+    // New: Optional property to store a user-defined shortcut string representation
+    var shortcut: String? // e.g., "⌘⌥Q", "⌃⇧A" - Not functional yet, just for display
 }

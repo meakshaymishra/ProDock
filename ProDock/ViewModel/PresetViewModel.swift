@@ -2,34 +2,29 @@
 
 import SwiftUI
 import Combine
-import AppKit // For NSEvent (not for Accessibility API directly here)
+import AppKit // For NSEvent
 
+// Keep the helper function outside or move to a dedicated file if preferred
 @MainActor
 internal func checkAccessibilityPermission() -> Bool {
-    // Create the options dictionary using a direct string key instead of the constant
     let options = ["AXTrustedCheckOptionPrompt": true] as CFDictionary
-
-    // Perform the actual permission check.
     let isTrusted = AXIsProcessTrustedWithOptions(options)
-    
-    // Log the result for debugging.
     print("Accessibility Check Result (Helper): \(isTrusted)")
-    
     return isTrusted
 }
 
-
-@MainActor // ViewModel itself runs on the MainActor
+@MainActor
 class PresetViewModel: ObservableObject {
 
     // MARK: - Published Properties for UI Binding
     @Published var presetStore = PresetStore()
     @Published var newPresetName: String = ""
     @Published var isLoading: Bool = false
-    @Published var statusMessage: String = ""
-    @Published var errorMessage: String = ""
+    @Published var statusMessage: String = "" // Can be displayed somewhere if needed
+    @Published var errorMessage: String = ""  // Can be displayed somewhere if needed
     @Published var showErrorAlert: Bool = false
     @Published var accessibilityGranted: Bool = false // Updated by the check
+    @Published var selectedPresetForEditing: DockPreset? = nil // For future edit pane
 
     // MARK: - Private Properties
     private let dockutilService = DockutilService()
@@ -39,93 +34,90 @@ class PresetViewModel: ObservableObject {
     // MARK: - Initialization
     init() {
         presetStore.load()
-        setupDebounceTimers() // Encapsulate debounce setup
+        setupDebounceTimers()
+        // Initial check on launch (can also be triggered from View's onAppear)
+        self.accessibilityGranted = checkAccessibilityPermission()
     }
 
     private func setupDebounceTimers() {
-        // Automatically clear status message after a delay
+        // Debounce logic for status/error messages remains,
+        // but their display is removed from ContentView for now.
+        // They can be re-added later, perhaps as overlays or toasts.
         $statusMessage
             .debounce(for: .seconds(5), scheduler: RunLoop.main)
             .sink { [weak self] _ in self?.statusMessage = "" }
             .store(in: &cancellables)
 
-        // Automatically clear error message after a delay (longer)
         $errorMessage
             .debounce(for: .seconds(10), scheduler: RunLoop.main)
             .sink { [weak self] _ in
-                 // Only clear if the alert isn't currently showing the message
-                 if !(self?.showErrorAlert ?? false) {
-                     self?.errorMessage = ""
-                 }
+                 if !(self?.showErrorAlert ?? false) { self?.errorMessage = "" }
             }
             .store(in: &cancellables)
-        
-        // Ensure error message is cleared when the alert is dismissed
+
         $showErrorAlert
-            .filter { !$0 } // Only react when showErrorAlert becomes false
-            .sink { [weak self] _ in
-                 self?.errorMessage = ""
-            }
+            .filter { !$0 }
+            .sink { [weak self] _ in self?.errorMessage = "" }
             .store(in: &cancellables)
     }
 
     // MARK: - Accessibility and Global Hotkey Setup
 
-    /// Checks for Accessibility permissions using a helper and sets up the global key listener if granted.
-    /// Should be called from the main view's `.onAppear`.
     func checkAndSetupGlobalKeyListener() {
-        // Ensure this setup code runs only once unless explicitly reset
         guard eventMonitor == nil else {
-            print("Event monitor setup already attempted or completed.")
+            print("Event monitor setup already attempted.")
+            // Re-check permission in case it changed while app was running
+            self.accessibilityGranted = checkAccessibilityPermission()
+            // If it was just granted, try setting up monitor again (optional)
+            // if self.accessibilityGranted { setupMonitor() }
             return
         }
-        
-        // Call the dedicated @MainActor helper function to perform the check
-        let appIsTrusted = checkAccessibilityPermission() // Defined in AccessibilityHelper.swift
-        self.accessibilityGranted = appIsTrusted         // Update published property
 
-        if appIsTrusted {
-            print("Accessibility access granted (ViewModel).")
-            
-            // Setup the event monitor (also runs on MainActor context)
-            eventMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
-                // Event handling code remains the same...
-                guard let self = self else { return }
-                let desiredModifiers: NSEvent.ModifierFlags = [.command, .option]
-                let desiredKeyCode: UInt16 = 12 // Q key KeyCode (Find others using tools like Key Codes app)
+        self.accessibilityGranted = checkAccessibilityPermission()
 
-                // Check if the event matches the shortcut
-                if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == desiredModifiers && event.keyCode == desiredKeyCode {
-                    print("Global Shortcut Detected!")
-
-                    // --- Shortcut Mapping Logic ---
-                    // TODO: Implement mapping from this specific shortcut to a preset
-                    // For now, we just apply the first preset as a demo.
-                    if let presetToApply = self.presetStore.presets.first {
-                        print("Applying preset via shortcut: \(presetToApply.name)")
-                        // `applyPreset` is already MainActor safe
-                        self.applyPreset(presetToApply)
-                    } else {
-                        print("Shortcut triggered, but no presets found to apply.")
-                    }
-                    // --- End Shortcut Mapping Logic ---
-                }
-            } // End of event handler closure
-
-            if eventMonitor == nil {
-                presentError("Failed to install global event monitor even with permissions.")
-            } else {
-                 print("Global event monitor installed successfully.")
-            }
+        if accessibilityGranted {
+            print("Accessibility access granted. Setting up global monitor.")
+            setupMonitor()
         } else {
-            // Permission denied
-            print("Accessibility access denied (ViewModel). Global shortcuts will not work.")
-            // UI will show warning based on `accessibilityGranted` state in ContentView
+            print("Accessibility access denied. Global shortcuts inactive.")
+            // Optionally remind user or guide them?
         }
     }
 
-    /// Removes the global keyboard event monitor if it exists.
-    /// Should be called when the application is terminating or the feature is disabled.
+    private func setupMonitor() {
+        // Ensure previous monitor is removed if this is called again
+        removeGlobalKeyListener()
+
+        eventMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            guard let self = self else { return }
+            // --- Shortcut Mapping Logic ---
+            // TODO: This needs significant rework to map specific shortcuts
+            //       stored in presets (DockPreset.shortcut) to actions.
+            //       The current hardcoded example remains for now.
+
+            let desiredModifiers: NSEvent.ModifierFlags = [.command, .option]
+            let desiredKeyCode: UInt16 = 12 // Q key
+
+            if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == desiredModifiers && event.keyCode == desiredKeyCode {
+                print("Global Shortcut (Hardcoded ⌘⌥Q) Detected!")
+                if let presetToApply = self.presetStore.presets.first {
+                    print("Applying preset via shortcut: \(presetToApply.name)")
+                    self.applyPreset(presetToApply)
+                } else {
+                    print("Shortcut triggered, but no presets found.")
+                }
+            }
+            // --- End Shortcut Mapping Logic ---
+        }
+
+        if eventMonitor == nil {
+            presentError("Failed to install global event monitor even with permissions.")
+        } else {
+             print("Global event monitor installed successfully.")
+        }
+    }
+
+
     func removeGlobalKeyListener() {
         if let monitor = eventMonitor {
             NSEvent.removeMonitor(monitor)
@@ -135,7 +127,6 @@ class PresetViewModel: ObservableObject {
     }
 
     // MARK: - Core Actions
-    // (saveCurrentDock, applyPreset, deletePreset, deletePresets remain unchanged)
 
     func saveCurrentDock() {
         let trimmedName = newPresetName.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -146,11 +137,11 @@ class PresetViewModel: ObservableObject {
         guard !isLoading else { return }
 
         isLoading = true
-        statusMessage = "Reading current Dock state..."
+        // statusMessage = "Reading current Dock..." // Display elsewhere if needed
         errorMessage = ""
 
         Task {
-            defer { isLoading = false } // Ensure isLoading is reset using defer
+            defer { isLoading = false }
 
             let listResult = dockutilService.listItems()
 
@@ -159,13 +150,14 @@ class PresetViewModel: ObservableObject {
                 let addCommands = parsedItems.map { dockutilService.constructAddCommandFragment(for: $0) }
                 guard !addCommands.isEmpty else {
                      presentError("Could not read any items from the Dock.")
-                     return // isLoading is handled by defer
+                     return
                 }
 
-                let newPreset = DockPreset(name: trimmedName, addCommandFragments: addCommands)
+                // Create preset without a shortcut for now
+                let newPreset = DockPreset(name: trimmedName, addCommandFragments: addCommands, shortcut: nil)
                 presetStore.addPreset(newPreset)
 
-                statusMessage = "Preset '\(trimmedName)' saved successfully."
+                // statusMessage = "Preset '\(trimmedName)' saved." // Display elsewhere
                 newPresetName = ""
 
             case .failure(let error):
@@ -176,69 +168,99 @@ class PresetViewModel: ObservableObject {
 
     func applyPreset(_ preset: DockPreset) {
         guard !isLoading else { return }
-
+        selectedPresetForEditing = nil // Clear selection when applying
         isLoading = true
-        statusMessage = "Applying preset '\(preset.name)'..."
+        // statusMessage = "Applying preset '\(preset.name)'..." // Display elsewhere
         errorMessage = ""
 
         Task {
-             defer { isLoading = false } // Ensure isLoading is reset using defer
+             defer { isLoading = false }
 
-            print("Clearing current Dock items (no restart)...")
             let removeResult = dockutilService.removeAll(noRestart: true)
-
             guard case .success = removeResult else {
-                if case .failure(let error) = removeResult { presentError("Failed to clear Dock: \(error.localizedDescription)") }
-                else { presentError("Failed to clear Dock (unknown error).") }
-                return // isLoading is handled by defer
+                // Error handling...
+                presentError("Failed to clear Dock" + extractError(removeResult))
+                return
             }
 
-            print("Adding items for preset '\(preset.name)' (no restart)...")
             var allItemsAddedSuccessfully = true
             for (index, commandFragment) in preset.addCommandFragments.enumerated() {
-                print("  Adding item \(index + 1)/\(preset.addCommandFragments.count): \(commandFragment)")
                 let addResult = dockutilService.addItem(commandFragment: commandFragment, noRestart: true)
-                if case .failure(let error) = addResult {
-                     presentError("Failed to add item (\(commandFragment)): \(error.localizedDescription)")
+                if case .failure = addResult {
+                     presentError("Failed to add item (\(index+1)): \(commandFragment)" + extractError(addResult))
                      allItemsAddedSuccessfully = false
-                     break
+                     break // Stop adding if one fails
                  }
-                 // Optional delay if needed: try? await Task.sleep(nanoseconds: 10_000_000)
             }
 
             if allItemsAddedSuccessfully {
-                print("All items added, restarting Dock...")
                 let restartResult = dockutilService.restartDock()
-                if case .failure(let error) = restartResult {
-                    print("Warning: Failed to explicitly restart Dock: \(error.localizedDescription).")
-                    statusMessage = "Preset '\(preset.name)' applied, but Dock restart failed (may require manual restart)."
+                if case .failure = restartResult {
+                    // Handle restart failure (maybe less critical)
+                    presentError("Preset applied, but Dock restart failed." + extractError(restartResult))
                 } else {
-                     statusMessage = "Preset '\(preset.name)' applied successfully."
+                     // statusMessage = "Preset '\(preset.name)' applied." // Display elsewhere
                 }
             }
-             // Error message set previously if !allItemsAddedSuccessfully
-             // isLoading handled by defer
+             // Error messages handled by presentError
         }
     }
 
+    // Placeholder for future edit action
+    func editPreset(_ preset: DockPreset) {
+        print("Attempting to edit preset: \(preset.name)")
+        selectedPresetForEditing = preset
+        // The right pane in ContentView will react to this change
+    }
+
+    // Placeholder for future duplicate action
+    func duplicatePreset(_ preset: DockPreset) {
+        print("Attempting to duplicate preset: \(preset.name)")
+        var duplicatedPreset = preset // Create a copy
+        duplicatedPreset.id = UUID() // Assign a new ID
+        duplicatedPreset.name = "\(preset.name) Copy" // Append "Copy"
+        // duplicatedPreset.shortcut = nil // Decide if shortcut should be copied
+        presetStore.addPreset(duplicatedPreset)
+        // statusMessage = "Preset '\(preset.name)' duplicated."
+    }
+
+
     func deletePreset(_ preset: DockPreset) {
         presetStore.deletePreset(withId: preset.id)
-        statusMessage = "Preset '\(preset.name)' deleted."
+        if selectedPresetForEditing?.id == preset.id {
+            selectedPresetForEditing = nil // Clear selection if deleted
+        }
+        // statusMessage = "Preset '\(preset.name)' deleted." // Display elsewhere
     }
 
+    // Keep this for potential swipe-to-delete if List allows it with custom rows
     func deletePresets(at offsets: IndexSet) {
-        let namesToDelete = offsets.map { presetStore.presets[$0].name }.joined(separator: ", ")
+        let presetsToDelete = offsets.map { presetStore.presets[$0] }
         presetStore.deletePresets(at: offsets)
-        statusMessage = "Deleted preset(s): \(namesToDelete)."
+        for preset in presetsToDelete {
+            if selectedPresetForEditing?.id == preset.id {
+                selectedPresetForEditing = nil
+                break
+            }
+        }
+        // statusMessage = "Deleted presets."
     }
-
 
     // MARK: - Private Helpers
     private func presentError(_ message: String) {
         print("❌ Error Presented: \(message)")
-        // Already on MainActor due to class annotation
+        // Update published properties for alert
         self.errorMessage = message
-        self.showErrorAlert = true
+        self.showErrorAlert = true // Trigger the alert in ContentView
+        // Also potentially log to a file or analytics
+    }
+
+    // Helper to extract error description from Result
+    private func extractError<T>(_ result: Result<T, DockutilError>) -> String {
+        if case .failure(let error) = result {
+            return ": \(error.localizedDescription)"
+        }
+        return "."
     }
 
 } // End of PresetViewModel class
