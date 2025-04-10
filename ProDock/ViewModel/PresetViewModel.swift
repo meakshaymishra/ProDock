@@ -1,266 +1,357 @@
 // PresetViewModel.swift
 
-import SwiftUI
+import AppKit
 import Combine
-import AppKit // For NSEvent
+import SwiftUI
+
+// Define the prefix used to mark disabled items
+let disabledPrefix = "DISABLED::"
 
 // Keep the helper function outside or move to a dedicated file if preferred
 @MainActor
-internal func checkAccessibilityPermission() -> Bool {
-    let options = ["AXTrustedCheckOptionPrompt": true] as CFDictionary
-    let isTrusted = AXIsProcessTrustedWithOptions(options)
-    print("Accessibility Check Result (Helper): \(isTrusted)")
-    return isTrusted
+internal func checkAccessibilityPermission() -> Bool { /* ... */
+    return AXIsProcessTrustedWithOptions(["AXTrustedCheckOptionPrompt": true] as CFDictionary)
+}
+
+// MARK: - Editable Item Representation (Unchanged)
+struct PresetItemRepresentation: Identifiable, Hashable {
+    let id = UUID()
+    let displayName: String
+    var originalFragment: String
+    var isEnabled: Bool = true
 }
 
 @MainActor
 class PresetViewModel: ObservableObject {
 
-    // MARK: - Published Properties for UI Binding
+    // MARK: - Published Properties (Unchanged)
     @Published var presetStore = PresetStore()
     @Published var newPresetName: String = ""
     @Published var isLoading: Bool = false
-    @Published var statusMessage: String = "" // Can be displayed somewhere if needed
-    @Published var errorMessage: String = ""  // Can be displayed somewhere if needed
+    @Published var statusMessage: String = ""
+    @Published var errorMessage: String = ""
     @Published var showErrorAlert: Bool = false
-    @Published var accessibilityGranted: Bool = false // Updated by the check
-    @Published var selectedPresetForEditing: DockPreset? = nil // For future edit pane
+    @Published var accessibilityGranted: Bool = false
+    @Published var editablePresetItems: [PresetItemRepresentation] = []
+    @Published var selectedPresetForEditing: DockPreset? = nil {
+        didSet { updateEditableItems(for: selectedPresetForEditing) }
+    }
 
-    // MARK: - Private Properties
+    // MARK: - Private Properties (Unchanged)
     private let dockutilService = DockutilService()
     private var cancellables = Set<AnyCancellable>()
     private var eventMonitor: Any?
 
-    // MARK: - Initialization
-    init() {
+    // MARK: - Initialization & Setup (Unchanged)
+    init() { /*...*/
         presetStore.load()
         setupDebounceTimers()
-        // Initial check on launch (can also be triggered from View's onAppear)
         self.accessibilityGranted = checkAccessibilityPermission()
     }
-
-    private func setupDebounceTimers() {
-        // Debounce logic for status/error messages remains,
-        // but their display is removed from ContentView for now.
-        // They can be re-added later, perhaps as overlays or toasts.
-        $statusMessage
-            .debounce(for: .seconds(5), scheduler: RunLoop.main)
-            .sink { [weak self] _ in self?.statusMessage = "" }
-            .store(in: &cancellables)
-
-        $errorMessage
-            .debounce(for: .seconds(10), scheduler: RunLoop.main)
-            .sink { [weak self] _ in
-                 if !(self?.showErrorAlert ?? false) { self?.errorMessage = "" }
-            }
-            .store(in: &cancellables)
-
-        $showErrorAlert
-            .filter { !$0 }
-            .sink { [weak self] _ in self?.errorMessage = "" }
-            .store(in: &cancellables)
+    private func setupDebounceTimers() { /*...*/
+        $statusMessage.debounce(for: .seconds(5), scheduler: RunLoop.main).sink { [weak self] _ in
+            self?.statusMessage = ""
+        }.store(in: &cancellables)
+        $errorMessage.debounce(for: .seconds(10), scheduler: RunLoop.main).sink { [weak self] _ in
+            if !(self?.showErrorAlert ?? false) { self?.errorMessage = "" }
+        }.store(in: &cancellables)
+        $showErrorAlert.filter { !$0 }.sink { [weak self] _ in self?.errorMessage = "" }.store(
+            in: &cancellables)
     }
 
-    // MARK: - Accessibility and Global Hotkey Setup
-
-    func checkAndSetupGlobalKeyListener() {
+    // MARK: - Accessibility & Hotkeys (Unchanged)
+    // ... checkAndSetupGlobalKeyListener, setupMonitor, removeGlobalKeyListener ...
+    func checkAndSetupGlobalKeyListener() { /*...*/
         guard eventMonitor == nil else {
-            print("Event monitor setup already attempted.")
-            // Re-check permission in case it changed while app was running
             self.accessibilityGranted = checkAccessibilityPermission()
-            // If it was just granted, try setting up monitor again (optional)
-            // if self.accessibilityGranted { setupMonitor() }
             return
         }
-
         self.accessibilityGranted = checkAccessibilityPermission()
-
-        if accessibilityGranted {
-            print("Accessibility access granted. Setting up global monitor.")
-            setupMonitor()
-        } else {
-            print("Accessibility access denied. Global shortcuts inactive.")
-            // Optionally remind user or guide them?
-        }
+        if accessibilityGranted { setupMonitor() }
     }
-
-    private func setupMonitor() {
-        // Ensure previous monitor is removed if this is called again
+    private func setupMonitor() { /*...*/
         removeGlobalKeyListener()
-
         eventMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
             guard let self = self else { return }
-            // --- Shortcut Mapping Logic ---
-            // TODO: This needs significant rework to map specific shortcuts
-            //       stored in presets (DockPreset.shortcut) to actions.
-            //       The current hardcoded example remains for now.
-
-            let desiredModifiers: NSEvent.ModifierFlags = [.command, .option]
-            let desiredKeyCode: UInt16 = 12 // Q key
-
-            if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == desiredModifiers && event.keyCode == desiredKeyCode {
-                print("Global Shortcut (Hardcoded ⌘⌥Q) Detected!")
-                if let presetToApply = self.presetStore.presets.first {
-                    print("Applying preset via shortcut: \(presetToApply.name)")
-                    self.applyPreset(presetToApply)
-                } else {
-                    print("Shortcut triggered, but no presets found.")
-                }
+            let mod: NSEvent.ModifierFlags = [.command, .option]
+            let key: UInt16 = 12
+            if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == mod
+                && event.keyCode == key
+            {
+                if let p = self.presetStore.presets.first { self.applyPreset(p) }
             }
-            // --- End Shortcut Mapping Logic ---
         }
-
         if eventMonitor == nil {
-            presentError("Failed to install global event monitor even with permissions.")
+            presentError("Failed event monitor install.")
         } else {
-             print("Global event monitor installed successfully.")
+            print("Event monitor installed.")
         }
     }
-
-
-    func removeGlobalKeyListener() {
-        if let monitor = eventMonitor {
-            NSEvent.removeMonitor(monitor)
+    func removeGlobalKeyListener() { /*...*/
+        if let m = eventMonitor {
+            NSEvent.removeMonitor(m)
             eventMonitor = nil
-            print("Global event monitor removed.")
+            print("Event monitor removed.")
         }
     }
 
-    // MARK: - Core Actions
-
-    func saveCurrentDock() {
-        let trimmedName = newPresetName.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedName.isEmpty else {
-            presentError("Please enter a name for the preset.")
+    // MARK: - Core Actions (Unchanged - Apply already checks prefix)
+    // ... saveCurrentDock, applyPreset, editPreset, duplicatePreset, deletePreset, deletePresets ...
+    func saveCurrentDock() { /*...*/
+        let name = newPresetName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !name.isEmpty else {
+            presentError("Need name.")
             return
         }
         guard !isLoading else { return }
-
         isLoading = true
-        // statusMessage = "Reading current Dock..." // Display elsewhere if needed
         errorMessage = ""
-
         Task {
             defer { isLoading = false }
-
-            let listResult = dockutilService.listItems()
-
-            switch listResult {
-            case .success(let parsedItems):
-                let addCommands = parsedItems.map { dockutilService.constructAddCommandFragment(for: $0) }
-                guard !addCommands.isEmpty else {
-                     presentError("Could not read any items from the Dock.")
-                     return
+            let result = dockutilService.listItems()
+            switch result {
+            case .success(let items):
+                let cmds = items.map { dockutilService.constructAddCommandFragment(for: $0) }
+                guard !cmds.isEmpty else {
+                    presentError("Dock empty?")
+                    return
                 }
-
-                // Create preset without a shortcut for now
-                let newPreset = DockPreset(name: trimmedName, addCommandFragments: addCommands, shortcut: nil)
+                let newPreset = DockPreset(name: name, addCommandFragments: cmds, shortcut: nil)
                 presetStore.addPreset(newPreset)
-
-                // statusMessage = "Preset '\(trimmedName)' saved." // Display elsewhere
                 newPresetName = ""
-
-            case .failure(let error):
-                presentError("Failed to read Dock: \(error.localizedDescription)")
+            case .failure(let e): presentError("Read Dock fail: \(e.localizedDescription)")
             }
         }
     }
-
-    func applyPreset(_ preset: DockPreset) {
+    func applyPreset(_ preset: DockPreset) { /* Apply checks disabledPrefix */
+        guard let currentPresetData = presetStore.presets.first(where: { $0.id == preset.id })
+        else {
+            presentError("Preset \(preset.name) not found.")
+            return
+        }
         guard !isLoading else { return }
-        selectedPresetForEditing = nil // Clear selection when applying
         isLoading = true
-        // statusMessage = "Applying preset '\(preset.name)'..." // Display elsewhere
         errorMessage = ""
-
         Task {
-             defer { isLoading = false }
-
-            let removeResult = dockutilService.removeAll(noRestart: true)
-            guard case .success = removeResult else {
-                // Error handling...
-                presentError("Failed to clear Dock" + extractError(removeResult))
+            defer { isLoading = false }
+            let remRes = dockutilService.removeAll(noRestart: true)
+            guard case .success = remRes else {
+                presentError("Clear Dock fail" + extractError(remRes))
                 return
             }
-
-            var allItemsAddedSuccessfully = true
-            for (index, commandFragment) in preset.addCommandFragments.enumerated() {
-                let addResult = dockutilService.addItem(commandFragment: commandFragment, noRestart: true)
-                if case .failure = addResult {
-                     presentError("Failed to add item (\(index+1)): \(commandFragment)" + extractError(addResult))
-                     allItemsAddedSuccessfully = false
-                     break // Stop adding if one fails
-                 }
-            }
-
-            if allItemsAddedSuccessfully {
-                let restartResult = dockutilService.restartDock()
-                if case .failure = restartResult {
-                    // Handle restart failure (maybe less critical)
-                    presentError("Preset applied, but Dock restart failed." + extractError(restartResult))
-                } else {
-                     // statusMessage = "Preset '\(preset.name)' applied." // Display elsewhere
+            var allOk = true
+            for fragment in currentPresetData.addCommandFragments {
+                if fragment.hasPrefix(disabledPrefix) {
+                    print("Skipping disabled: \(fragment)")
+                    continue
+                }
+                let addRes = dockutilService.addItem(commandFragment: fragment, noRestart: true)
+                if case .failure = addRes {
+                    presentError("Add fail (\(fragment))" + extractError(addRes))
+                    allOk = false
+                    break
                 }
             }
-             // Error messages handled by presentError
-        }
-    }
-
-    // Placeholder for future edit action
-    func editPreset(_ preset: DockPreset) {
-        print("Attempting to edit preset: \(preset.name)")
-        selectedPresetForEditing = preset
-        // The right pane in ContentView will react to this change
-    }
-
-    // Placeholder for future duplicate action
-    func duplicatePreset(_ preset: DockPreset) {
-        print("Attempting to duplicate preset: \(preset.name)")
-        var duplicatedPreset = preset // Create a copy
-        duplicatedPreset.id = UUID() // Assign a new ID
-        duplicatedPreset.name = "\(preset.name) Copy" // Append "Copy"
-        // duplicatedPreset.shortcut = nil // Decide if shortcut should be copied
-        presetStore.addPreset(duplicatedPreset)
-        // statusMessage = "Preset '\(preset.name)' duplicated."
-    }
-
-
-    func deletePreset(_ preset: DockPreset) {
-        presetStore.deletePreset(withId: preset.id)
-        if selectedPresetForEditing?.id == preset.id {
-            selectedPresetForEditing = nil // Clear selection if deleted
-        }
-        // statusMessage = "Preset '\(preset.name)' deleted." // Display elsewhere
-    }
-
-    // Keep this for potential swipe-to-delete if List allows it with custom rows
-    func deletePresets(at offsets: IndexSet) {
-        let presetsToDelete = offsets.map { presetStore.presets[$0] }
-        presetStore.deletePresets(at: offsets)
-        for preset in presetsToDelete {
-            if selectedPresetForEditing?.id == preset.id {
-                selectedPresetForEditing = nil
-                break
+            if allOk {
+                let restRes = dockutilService.restartDock()
+                if case .failure = restRes {
+                    presentError("Restart Dock fail" + extractError(restRes))
+                }
             }
         }
-        // statusMessage = "Deleted presets."
     }
-
-    // MARK: - Private Helpers
-    private func presentError(_ message: String) {
-        print("❌ Error Presented: \(message)")
-        // Update published properties for alert
-        self.errorMessage = message
-        self.showErrorAlert = true // Trigger the alert in ContentView
-        // Also potentially log to a file or analytics
+    func editPreset(_ preset: DockPreset) { selectedPresetForEditing = preset }
+    func duplicatePreset(_ preset: DockPreset) {
+        var dupe = preset
+        dupe.id = UUID()
+        dupe.name = "\(preset.name) Copy"
+        presetStore.addPreset(dupe)
     }
-
-    // Helper to extract error description from Result
-    private func extractError<T>(_ result: Result<T, DockutilError>) -> String {
-        if case .failure(let error) = result {
-            return ": \(error.localizedDescription)"
+    func deletePreset(_ preset: DockPreset) {
+        let id = preset.id
+        presetStore.deletePreset(withId: id)
+        if selectedPresetForEditing?.id == id { selectedPresetForEditing = nil }
+    }
+    func deletePresets(at offsets: IndexSet) {
+        let toDel = offsets.map { presetStore.presets[$0] }
+        presetStore.deletePresets(at: offsets)
+        if let selId = selectedPresetForEditing?.id, toDel.contains(where: { $0.id == selId }) {
+            selectedPresetForEditing = nil
         }
+    }
+
+    // MARK: - Reordering & Editing Logic
+
+    /// updateEditableItems (Unchanged)
+    private func updateEditableItems(for preset: DockPreset?) { /* Parses prefix */
+        guard let selectedPreset = preset else {
+            editablePresetItems = []
+            return
+        }
+        guard
+            let currentPresetData = presetStore.presets.first(where: { $0.id == selectedPreset.id })
+        else {
+            editablePresetItems = []
+            return
+        }
+        editablePresetItems = currentPresetData.addCommandFragments.map { fragment in
+            let isEnabled = !fragment.hasPrefix(disabledPrefix)
+            let contentFragment =
+                isEnabled ? fragment : String(fragment.dropFirst(disabledPrefix.count))
+            return PresetItemRepresentation(
+                displayName: generateDisplayName(for: contentFragment), originalFragment: fragment,
+                isEnabled: isEnabled)
+        }
+        print(
+            "Updated editable items for \(currentPresetData.name): \(editablePresetItems.count) items"
+        )
+    }
+
+    /// moveItem (Unchanged)
+    func moveItem(from source: IndexSet, to destination: Int) { /* Moves originalFragments */
+        editablePresetItems.move(fromOffsets: source, toOffset: destination)
+        let newFragmentOrder = editablePresetItems.map { $0.originalFragment }
+        guard let selectedId = selectedPresetForEditing?.id,
+            let indexInStore = presetStore.presets.firstIndex(where: { $0.id == selectedId })
+        else {
+            presentError("Preset not found to save reorder.")
+            return
+        }
+        presetStore.presets[indexInStore].addCommandFragments = newFragmentOrder
+        print("Updated fragment order for preset \(presetStore.presets[indexInStore].name)")
+        presetStore.save()
+    }
+
+    /// **MODIFIED toggleItemEnabled to fix guard let**
+    func toggleItemEnabled(itemID: UUID) {
+        // 1. Find index in the local editable array
+        guard let indexInEditable = editablePresetItems.firstIndex(where: { $0.id == itemID })
+        else { return }
+
+        // 2. Store the *original* fragment state before toggling
+        let originalFragmentWithPotentialPrefix = editablePresetItems[indexInEditable]
+            .originalFragment
+
+        // 3. Toggle the local state for immediate UI feedback
+        editablePresetItems[indexInEditable].isEnabled.toggle()
+        let currentIsEnabled = editablePresetItems[indexInEditable].isEnabled
+
+        // 4. Determine the new fragment string (add or remove prefix)
+        var newFragment: String
+        if currentIsEnabled {
+            // Remove prefix if it exists
+            newFragment =
+                originalFragmentWithPotentialPrefix.hasPrefix(disabledPrefix)
+                ? String(originalFragmentWithPotentialPrefix.dropFirst(disabledPrefix.count))
+                : originalFragmentWithPotentialPrefix
+        } else {
+            // Add prefix if it doesn't exist
+            newFragment =
+                originalFragmentWithPotentialPrefix.hasPrefix(disabledPrefix)
+                ? originalFragmentWithPotentialPrefix
+                : disabledPrefix + originalFragmentWithPotentialPrefix
+        }
+
+        // 5. Update the originalFragment in the local editable array
+        editablePresetItems[indexInEditable].originalFragment = newFragment
+
+        // 6. Find preset/fragment index in the store using the *original* fragment
+        guard let selectedId = selectedPresetForEditing?.id,
+            let indexInStore = presetStore.presets.firstIndex(where: { $0.id == selectedId }),
+            // **CORRECTION:** Directly unwrap the result of firstIndex using the non-optional originalFragmentWithPotentialPrefix
+            let fragmentIndexInPreset = presetStore.presets[indexInStore].addCommandFragments
+                .firstIndex(of: originalFragmentWithPotentialPrefix)
+        else {
+            // Error handling: Couldn't find the item in the store, revert local changes
+            presentError("Could not find preset or fragment in store to update toggle state.")
+            // Revert local array changes
+            editablePresetItems[indexInEditable].isEnabled.toggle()  // Toggle back
+            editablePresetItems[indexInEditable].originalFragment =
+                originalFragmentWithPotentialPrefix  // Restore original fragment
+            return
+        }
+
+        // 7. Update the fragment in the persistent store
+        presetStore.presets[indexInStore].addCommandFragments[fragmentIndexInPreset] = newFragment
+        print("Updated fragment in store: \(newFragment)")
+
+        // 8. Save the changes
+        presetStore.save()
+    }
+
+    // MARK: - Private Helpers (Unchanged - Already handle prefix awareness where needed)
+    // ... presentError, extractError, generateDisplayName, extractPathFromFragment ...
+    private func presentError(_ message: String) {
+        print("❌ Error: \(message)")
+        self.errorMessage = message
+        self.showErrorAlert = true
+    }
+    private func extractError<T>(_ result: Result<T, DockutilError>) -> String {
+        if case .failure(let e) = result { return ": \(e.localizedDescription)" }
         return "."
     }
+    private func generateDisplayName(for fragment: String) -> String { /* Handles prefix */
+        let contentFragment =
+            fragment.hasPrefix(disabledPrefix)
+            ? String(fragment.dropFirst(disabledPrefix.count)) : fragment
+        if let path = extractPathFromFragment(contentFragment) {
+            let fullPath = (path as NSString).expandingTildeInPath
+            if FileManager.default.fileExists(atPath: fullPath) {
+                let name = FileManager.default.displayName(atPath: fullPath)
+                if name.lowercased().hasSuffix(".app") {
+                    return name.replacingOccurrences(
+                        of: ".app", with: "", options: .caseInsensitive)
+                }
+                return name
+            } else {
+                return (path as NSString).lastPathComponent
+            }
+        } else if contentFragment.contains("--type small-spacer") {
+            return "Small Spacer"
+        } else if contentFragment.contains("--type spacer") {
+            return "Spacer"
+        }
+        return contentFragment.count > 30
+            ? String(contentFragment.prefix(30)) + "..." : contentFragment
+    }
+    private func extractPathFromFragment(_ contentFragment: String) -> String?
+    { /* Expects no prefix */
+        let trimmed = contentFragment.trimmingCharacters(in: .whitespaces)
+        if trimmed.starts(with: "''")
+            && (trimmed.contains("--type spacer") || trimmed.contains("--type small-spacer"))
+        {
+            return nil
+        }
+        if trimmed.starts(with: "'") {
+            guard
+                let c = trimmed.range(
+                    of: "'", options: .literal,
+                    range: trimmed.index(after: trimmed.startIndex)..<trimmed.endIndex)
+            else { return nil }
+            let p = String(trimmed[trimmed.index(after: trimmed.startIndex)..<c.lowerBound])
+            return p.isEmpty ? nil : p
+        } else {
+            if let s = trimmed.firstIndex(of: " ") {
+                let p = String(trimmed[..<s])
+                let eP = (p as NSString).expandingTildeInPath
+                if p.contains("/") || p.lowercased().hasSuffix(".app")
+                    || FileManager.default.fileExists(atPath: eP)
+                {
+                    return p
+                } else {
+                    return nil
+                }
+            } else {
+                let eP = (trimmed as NSString).expandingTildeInPath
+                if trimmed.contains("/") || trimmed.lowercased().hasSuffix(".app")
+                    || FileManager.default.fileExists(atPath: eP)
+                {
+                    return trimmed
+                } else {
+                    return nil
+                }
+            }
+        }
+    }
 
-} // End of PresetViewModel class
+}  // End of PresetViewModel class
