@@ -8,7 +8,7 @@
 
 Stop rearranging your macOS Dock manually! ProDock is a macOS utility application built with SwiftUI that allows you to save, manage, and quickly switch between different Dock configurations (presets), perfect for optimizing your workspace for different tasks or projects.
 
-![ProDock UI Demo](Assets/ProDock.gif)
+![ProDock UI Demo](Assets/ProDock_v2.gif)
 
 ## Features
 
